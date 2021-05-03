@@ -2,7 +2,13 @@ const router = require("express").Router();
 const Workout = require("../../models/workout.js");
 
 router.get("/", (req, res) => {
-    Workout.find({})
+    Workout.aggregate([
+        {
+            $addFields: {
+                totalDuration: { $sum: '$exercises.duration' }
+            }
+        }
+    ])
         .sort({ day: -1 })
         .then(dbWorkout => {
             res.json(dbWorkout)
@@ -13,13 +19,16 @@ router.get("/", (req, res) => {
 })
 
 router.get("/range", (req, res) => {
-    Workout.find({})
-        .then(dbWorkout => {
-            res.json(dbWorkout)
-        })
-        .catch(err => {
-            res.status(400).json(err)
-        })
+    Workout.aggregate([
+        {
+            $addFields: {
+                totalDuration: { $sum: '$exercises.duration' }
+            }
+        }
+    ]).then(db => {
+        console.log(db)
+        res.json(db)
+    })
 })
 
 router.post("/", async (req, res) => {
@@ -29,10 +38,7 @@ router.post("/", async (req, res) => {
 })
 
 router.put("/:id", (req, res) => {
-    console.log(req.params)
-    console.log(req.body)
     if (req.body.type === "cardio") {
-        console.log("cardio")
         Workout.updateOne({ _id: req.params.id }, {
             $set:
             {
@@ -46,7 +52,6 @@ router.put("/:id", (req, res) => {
             res.json(updatedWorkout)
         })
     } else if (req.body.type === "resistance") {
-        console.log("resistance")
         Workout.updateOne({ _id: req.params.id }, {
             $set:
             {
