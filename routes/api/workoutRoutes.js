@@ -52,6 +52,7 @@ router.put("/:id", (req, res) => {
             res.json(updatedWorkout)
         })
     } else if (req.body.type === "resistance") {
+        console.log(req.body)
         Workout.updateOne({ _id: req.params.id }, {
             $set:
             {
